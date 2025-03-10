@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import './BrochureCalculator.css';
 
 type Tier = { min: number; price: number };
 
@@ -29,19 +30,19 @@ const getPrice = (tiers: Tier[], quantity: number): number => {
 };
 
 interface Breakdown {
-  swCount: number; // Original S/W impression count
-  effectiveSwCount: number; // A4-equivalent count (doubled if A3)
-  swUnitPrice: number; // Normal unit price per additional S/W impression
-  swSurcharge: number; // Surcharge for the first S/W impression (if applicable)
-  swTotal: number; // Total S/W cost
-  colorCount: number; // Original color impression count
-  effectiveColorCount: number; // A4-equivalent count (doubled if A3)
-  colorUnitPrice: number; // Normal unit price per additional color impression
-  colorSurcharge: number; // Surcharge for the first color impression (if applicable)
-  colorTotal: number; // Total color cost
-  bindingCount: number; // Number of bindings
-  bindingCost: number; // Total binding cost
-  totalCost: number; // Grand total
+  swCount: number;              // Original S/W impression count
+  effectiveSwCount: number;     // A4-equivalent count (doubled if A3)
+  swUnitPrice: number;          // Normal unit price per additional S/W impression
+  swSurcharge: number;          // Surcharge for the first S/W impression (if applicable)
+  swTotal: number;              // Total S/W cost
+  colorCount: number;           // Original color impression count
+  effectiveColorCount: number;  // A4-equivalent count (doubled if A3)
+  colorUnitPrice: number;       // Normal unit price per additional color impression
+  colorSurcharge: number;       // Surcharge for the first color impression (if applicable)
+  colorTotal: number;           // Total color cost
+  bindingCount: number;         // Number of bindings
+  bindingCost: number;          // Total binding cost
+  totalCost: number;            // Grand total
 }
 
 // Parse input for colored pages (accepts individual numbers and ranges like "7-19")
@@ -50,19 +51,13 @@ const parseColorPages = (
   maxPage: number
 ): { pages: number[]; error?: string } => {
   if (!/^[0-9,\-\s]*$/.test(input)) {
-    return {
-      pages: [],
-      error: "Ungültige Zeichen. Erlaubt: Zahlen, Komma, Bindestrich.",
-    };
+    return { pages: [], error: "Ungültige Zeichen. Erlaubt: Zahlen, Komma, Bindestrich." };
   }
   const resultSet = new Set<number>();
-  const tokens = input
-    .split(",")
-    .map((t) => t.trim())
-    .filter((t) => t !== "");
+  const tokens = input.split(',').map(t => t.trim()).filter(t => t !== '');
   for (const token of tokens) {
-    if (token.includes("-")) {
-      const [startStr, endStr] = token.split("-").map((t) => t.trim());
+    if (token.includes('-')) {
+      const [startStr, endStr] = token.split('-').map(t => t.trim());
       const start = parseInt(startStr, 10);
       const end = parseInt(endStr, 10);
       if (isNaN(start) || isNaN(end) || start > end) {
@@ -70,20 +65,14 @@ const parseColorPages = (
       }
       for (let i = start; i <= end; i++) {
         if (i > maxPage)
-          return {
-            pages: [],
-            error: `Seitenzahl ${i} überschreitet die Gesamtseitenzahl (${maxPage}).`,
-          };
+          return { pages: [], error: `Seitenzahl ${i} überschreitet die Gesamtseitenzahl (${maxPage}).` };
         resultSet.add(i);
       }
     } else {
       const num = parseInt(token, 10);
       if (isNaN(num)) continue;
       if (num > maxPage)
-        return {
-          pages: [],
-          error: `Seitenzahl ${num} überschreitet die Gesamtseitenzahl (${maxPage}).`,
-        };
+        return { pages: [], error: `Seitenzahl ${num} überschreitet die Gesamtseitenzahl (${maxPage}).` };
       resultSet.add(num);
     }
   }
@@ -126,11 +115,9 @@ const calculateBrochureBreakdown = (
       [pageA, pageB],
       [pageC, pageD],
     ];
-    impressions.forEach((pair) => {
-      if (pair.some((p) => p <= pagesPerBrochure)) {
-        const isColorImpression = pair.some(
-          (p) => p <= pagesPerBrochure && colorPages.includes(p)
-        );
+    impressions.forEach(pair => {
+      if (pair.some(p => p <= pagesPerBrochure)) {
+        const isColorImpression = pair.some(p => p <= pagesPerBrochure && colorPages.includes(p));
         if (isColorImpression) totalColor++;
         else totalBW++;
       }
@@ -191,45 +178,34 @@ const calculateBrochureBreakdown = (
 
 const BrochureCalculator: React.FC = () => {
   const [pages, setPages] = useState<number>(8);
-  const [colorPagesInput, setColorPagesInput] = useState<string>("");
+  const [colorPagesInput, setColorPagesInput] = useState<string>('');
   const [brochureCount, setBrochureCount] = useState<number>(1);
-  const [isA3, setIsA3] = useState<boolean>(false); // A4 mode for this example
+  const [isA3, setIsA3] = useState<boolean>(false);
   const [breakdown, setBreakdown] = useState<Breakdown | null>(null);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
-    const { pages: parsedPages, error: parseError } = parseColorPages(
-      colorPagesInput,
-      pages
-    );
+    const { pages: parsedPages, error: parseError } = parseColorPages(colorPagesInput, pages);
     if (parseError) {
       setError(parseError);
       setBreakdown(null);
       return;
     }
-    setError("");
-    const result = calculateBrochureBreakdown(
-      pages,
-      parsedPages,
-      brochureCount,
-      isA3
-    );
+    setError('');
+    const result = calculateBrochureBreakdown(pages, parsedPages, brochureCount, isA3);
     setBreakdown(result);
   }, [pages, colorPagesInput, brochureCount, isA3]);
 
   const handleColorPagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const filtered = value.replace(/[^0-9,\-\s]/g, "");
+    const filtered = value.replace(/[^0-9,\-\s]/g, '');
     setColorPagesInput(filtered);
   };
 
   // Helper to format category display.
-  // Returns an object with displayCount and displayPrice.
-  const formatCategory = (
-    surcharge: number,
-    effectiveCount: number,
-    unitPrice: number
-  ) => {
+  // Returns displayCount as "1/(n-1)" if surcharge exists, else just the count.
+  // Similarly for displayPrice: "€X/€Y" if surcharge exists, else just unit price.
+  const formatCategory = (surcharge: number, effectiveCount: number, unitPrice: number) => {
     if (surcharge > 0 && effectiveCount > 0) {
       const additional = effectiveCount - 1;
       return {
@@ -245,179 +221,128 @@ const BrochureCalculator: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="calculator-container">
       <h2>Broschürenkostenrechner</h2>
-      <table style={{ borderCollapse: "collapse", marginBottom: "1rem" }}>
+      <table className="input-table">
         <tbody>
           <tr>
-            <td style={{ padding: "0.5rem" }}>
+            <td className="input-cell">
               <label>
-                Anzahl der Broschüren:
+              Anzahl Broschüren:
                 <input
                   type="number"
                   min="1"
                   value={brochureCount}
-                  onChange={(e) =>
-                    setBrochureCount(parseInt(e.target.value, 10) || 0)
-                  }
-                  style={{ marginLeft: "0.5rem" }}
+                  onChange={e => setBrochureCount(parseInt(e.target.value, 10) || 0)}
+                  className="input-number"
                 />
               </label>
             </td>
-            <td style={{ padding: "0.5rem" }}>
+            <td className="input-cell">
               <label>
                 <input
                   type="checkbox"
                   checked={isA3}
-                  onChange={(e) => setIsA3(e.target.checked)}
-                  style={{ marginLeft: "0.5rem" }}
+                  onChange={e => setIsA3(e.target.checked)}
+                  className="input-checkbox"
                 />
-                A3-A4 Broschüre:
+                A3-A4 Broschüren
               </label>
             </td>
           </tr>
           <tr>
-            <td style={{ padding: "0.5rem" }}>
+            <td className="input-cell">
               <label>
-                Seiten pro Broschüre:
+                Seiten je Broschüre:
                 <input
                   type="number"
                   min="1"
                   value={pages}
-                  onChange={(e) => setPages(parseInt(e.target.value, 10) || 0)}
-                  style={{ marginLeft: "0.5rem" }}
+                  onChange={e => setPages(parseInt(e.target.value, 10) || 0)}
+                  className="input-number"
                 />
               </label>
             </td>
-            <td style={{ padding: "0.5rem" }}>
+            <td className="input-cell">
               <label>
-                Farbige Seiten{" "}
-                <span
-                  style={{
-                    fontSize: "small",
-                    color: "#666",
-                  }}
-                >
-                  (z.B. 1, 4, 7-19)
-                </span>
-                :
+                Seitenzahlen farbe:<span className="input-hint">
+              (z.B. 1, 3-5, 7)
+            </span> 
                 <input
                   type="text"
                   value={colorPagesInput}
                   onChange={handleColorPagesChange}
-                  style={{ marginLeft: "0.5rem" }}
+                  className="input-text"
                 />
               </label>
             </td>
           </tr>
+
         </tbody>
       </table>
-      {error && (
-        <div style={{ color: "red", marginBottom: "1rem" }}>{error}</div>
-      )}
+      {error && <div className="error">{error}</div>}
       {breakdown && (
         <>
           <h3>Kostenzusammenfassung:</h3>
-          <table
-            style={{
-              borderCollapse: "collapse",
-              width: "100%",
-              marginBottom: "1rem",
-            }}
-          >
+          <table className="summary-table">
             <thead>
               <tr>
-                <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                  Kategorie
-                </th>
-                <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                  Anzahl
-                </th>
-                <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                  Einzelpreis
-                </th>
-                <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                  Gesamtpreis
-                </th>
+                <th>Kategorie</th>
+                <th>Anzahl (A4-Drucke)</th>
+                <th>Einzelpreis</th>
+                <th>Gesamtpreis</th>
               </tr>
             </thead>
             <tbody>
               {breakdown.swTotal > 0 && (
                 <tr>
-                  <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                    Schwarz-Weiß-Drucke
+                  <td>Schwarz-Weiß-Drucke</td>
+                  <td>
+                    {formatCategory(breakdown.swSurcharge, breakdown.effectiveSwCount, breakdown.swUnitPrice)
+                      .displayCount}
                   </td>
-                  <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                    {
-                      formatCategory(
-                        breakdown.swSurcharge,
-                        breakdown.effectiveSwCount,
-                        breakdown.swUnitPrice
-                      ).displayCount
-                    }
+                  <td>
+                    {formatCategory(breakdown.swSurcharge, breakdown.effectiveSwCount, breakdown.swUnitPrice)
+                      .displayPrice}
                   </td>
-                  <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                    {
-                      formatCategory(
-                        breakdown.swSurcharge,
-                        breakdown.effectiveSwCount,
-                        breakdown.swUnitPrice
-                      ).displayPrice
-                    }
-                  </td>
-                  <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                    €{breakdown.swTotal.toFixed(2)}
-                  </td>
+                  <td>€{breakdown.swTotal.toFixed(2)}</td>
                 </tr>
               )}
               {breakdown.colorTotal > 0 && (
                 <tr>
-                  <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                    Farbdrucke
+                  <td>Farbdrucke</td>
+                  <td>
+                    {formatCategory(
+                      breakdown.colorSurcharge,
+                      breakdown.effectiveColorCount,
+                      breakdown.colorUnitPrice
+                    ).displayCount}
                   </td>
-                  <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                    {
-                      formatCategory(
-                        breakdown.colorSurcharge,
-                        breakdown.effectiveColorCount,
-                        breakdown.colorUnitPrice
-                      ).displayCount
-                    }
+                  <td>
+                    {formatCategory(
+                      breakdown.colorSurcharge,
+                      breakdown.effectiveColorCount,
+                      breakdown.colorUnitPrice
+                    ).displayPrice}
                   </td>
-                  <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                    {
-                      formatCategory(
-                        breakdown.colorSurcharge,
-                        breakdown.effectiveColorCount,
-                        breakdown.colorUnitPrice
-                      ).displayPrice
-                    }
-                  </td>
-                  <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                    €{breakdown.colorTotal.toFixed(2)}
-                  </td>
+                  <td>€{breakdown.colorTotal.toFixed(2)}</td>
                 </tr>
               )}
               {breakdown.bindingCost > 0 && (
                 <tr>
-                  <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                    Bindung
-                  </td>
-                  <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                    {breakdown.bindingCount}
-                  </td>
-                  <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                    €0.18
-                  </td>
-                  <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>
-                    €{breakdown.bindingCost.toFixed(2)}
-                  </td>
+                  <td>Bindung</td>
+                  <td>{breakdown.bindingCount}</td>
+                  <td>€0.18</td>
+                  <td>€{breakdown.bindingCost.toFixed(2)}</td>
                 </tr>
               )}
             </tbody>
           </table>
           <div>
-            <strong>Gesamtkosten:</strong> €{breakdown.totalCost.toFixed(2)}
+            <strong>Gesamtkosten:</strong> €{breakdown.totalCost.toFixed(2)} 
+            
+            {brochureCount > 1 ? ` (je Exemplar €${(breakdown.totalCost/brochureCount).toFixed(2)})` : ""}
+          
           </div>
         </>
       )}

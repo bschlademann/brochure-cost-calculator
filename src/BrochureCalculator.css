@@ -1,0 +1,55 @@
+.calculator-container {
+  padding: 1rem;
+  font-family: Arial, sans-serif;
+}
+
+.input-table {
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.input-cell {
+  padding: 0.5rem;
+}
+
+.input-hint {
+  padding: 0.5rem;
+  font-size: small;
+  color: #666;
+}
+
+.input-number {
+  margin-left: 0.5rem;
+  width: 60px;
+}
+
+.input-text {
+  margin-left: 0.5rem;
+  width: 150px;
+}
+
+.input-checkbox {
+  margin-left: 0.5rem;
+}
+
+.error {
+  color: red;
+  margin-bottom: 1rem;
+}
+
+.summary-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.summary-table th,
+.summary-table td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.total-cost {
+  font-size: 1.2rem;
+}
